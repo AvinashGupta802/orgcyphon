@@ -65,10 +65,13 @@ RUN apk add -U --no-cache \
       jpeg-dev \
       zlib-dev \
       tiff-dev \
-&& pip install --upgrade pip \
-&& pip install -r $CYPHON_HOME/requirements.txt \
-&& apk del build-deps \
-&& python -m nltk.downloader -d /usr/local/share/nltk_data punkt wordnet 
+&& pip install --upgrade pip 
+
+RUN pip install -r $CYPHON_HOME/requirements.txt 
+
+RUN apk del build-deps 
+
+RUN python -m nltk.downloader -d /usr/local/share/nltk_data punkt wordnet 
 
 # create unprivileged user
 RUN addgroup -S -g $GID cyphon && adduser -S -G cyphon -u $UID cyphon
