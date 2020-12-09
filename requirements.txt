@@ -28,7 +28,7 @@ geopy==1.17.0
 gunicorn==19.8.1
 html5lib==1.0.1
 httmock==1.2.6
-httplib2==0.11.3
+httplib2==0.18.0
 jira==2.0.0
 kombu==4.2.1
 langdetect==1.0.7
