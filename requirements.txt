@@ -32,7 +32,7 @@ httplib2==0.11.3
 jira==2.0.0
 kombu==4.2.1
 langdetect==1.0.7
-maxminddb==1.4.1
+maxminddb==1.5.0
 nltk==3.3
 oauth2==1.9.0.post1
 oauthlib==2.1.0
