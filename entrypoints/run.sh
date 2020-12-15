@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright 2017-2019 ControlScan, Inc.
+# Copyright 2017-2018 Dunbar Security Solutions, Inc.
 #
 # This file is part of Cyphon Engine.
 #
@@ -22,10 +22,12 @@ sleep 10
 cd /usr/src/app/cyphon
 
 # migrate db, so we have the latest db schema
-su-exec cyphon python manage.py migrate --verbosity 0
+#su-exec cyphon python manage.py migrate --verbosity 0
+sudo -H -u cyphon bash -c 'python3 manage.py migrate --verbosity 0'
 
 # collect static files
-su-exec cyphon python manage.py collectstatic --noinput --verbosity 0
+#su-exec cyphon python manage.py collectstatic --noinput --verbosity 0
+sudo -H -u cyphon bash -c 'python3 manage.py collectstatic --noinput --verbosity 0'
 
 # create superuser
 if [ "$CYPHON_SUPERUSER" = 'YES' ]; then
@@ -39,7 +41,8 @@ fi
 # load example fixtures
 if [ "$LOAD_EXAMPLE_FIXTURES" = 'YES' ]; then
     echo "Loading example fixtures..."
-    su-exec cyphon python manage.py loaddata fixtures/starter-fixtures.json
+   # su-exec cyphon python manage.py loaddata fixtures/starter-fixtures.json
+	sudo -H -u cyphon bash -c 'python manage.py loaddata fixtures/starter-fixtures.json'
 fi
 
 if [ "$CYPHON_ENV" = 'PROD' ]; then
@@ -54,10 +57,10 @@ if [ "$CYPHON_ENV" = 'PROD' ]; then
 
 elif [ "$CYPHON_ENV" = 'TEST' ]; then
     echo "Running Unit Tests"
-    exec python manage.py test --noinput "$@"
+    exec python3 manage.py test --noinput "$@"
 
 else
     echo "Running Development Server"
-    exec python manage.py runserver 0.0.0.0:8000 "$@"
+    exec python3 manage.py runserver 0.0.0.0:8000 "$@"
 
 fi
