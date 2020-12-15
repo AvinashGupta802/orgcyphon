@@ -35,14 +35,14 @@ if [ "$CYPHON_SUPERUSER" = 'YES' ]; then
           USER_MODEL = get_user_model(); \
           args = ['$CYPHON_USERNAME', '$CYPHON_PASSWORD']; \
           USER_MODEL.objects.create_superuser(*args)" \
-          | python manage.py shell
+          | python3 manage.py shell
 fi
 
 # load example fixtures
 if [ "$LOAD_EXAMPLE_FIXTURES" = 'YES' ]; then
     echo "Loading example fixtures..."
    # su-exec cyphon python manage.py loaddata fixtures/starter-fixtures.json
-	sudo -H -u cyphon bash -c 'python manage.py loaddata fixtures/starter-fixtures.json'
+	sudo -H -u cyphon bash -c 'python3 manage.py loaddata fixtures/starter-fixtures.json'
 fi
 
 if [ "$CYPHON_ENV" = 'PROD' ]; then
