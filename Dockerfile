@@ -1,28 +1,17 @@
-############################################################
-# Dockerfile to run a Django-based web application
-# Based on a Python 3.6 image
-#
-# Copyright 2017-2019 ControlScan, Inc.
-#
-# This file is part of Cyphon Engine.
-#
-# Cyphon Engine is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 3 of the License.
-#
-# Cyphon Engine is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with Cyphon Engine. If not, see <http://www.gnu.org/licenses/>.
-#
-############################################################
+FROM ubuntu:18.04
 
-FROM python:3.6-alpine
+RUN apt-get update
 
-MAINTAINER Cyphon <cyphondev@controlscan.com>
+RUN apt-get install -y curl 
+
+RUN apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    software-properties-common
+	
+RUN apt-get -y install python-pip
+
+
 
 ARG UID=1000
 ARG GID=1000
@@ -32,49 +21,23 @@ ENV LOG_DIR     /var/log/cyphon
 ENV PATH        $PATH:$CYPHON_HOME
 ENV NLTK_DATA   /usr/share/nltk_data
 
-# copy requirements.txt to the image
 COPY requirements.txt $CYPHON_HOME/requirements.txt
 
-# install Alpine and Python dependencies
-RUN apk add -U --no-cache \
-      --repository http://dl-5.alpinelinux.org/alpine/edge/main/ \
-      --repository http://dl-5.alpinelinux.org/alpine/edge/testing/ \
-      --repository http://dl-5.alpinelinux.org/alpine/edge/community/ \
-      binutils \
-      gdal \
-      postgis \
-      proj-dev \
-      py3-gdal \
-      su-exec \
-&& ln -s /usr/lib/libgdal.so.20 /usr/lib/libgdal.so \
-&& ln -s /usr/lib/libgeos_c.so.1 /usr/lib/libgeos_c.so \
-&& apk add -U --no-cache \
-      --repository http://dl-5.alpinelinux.org/alpine/edge/main/ \
-      --repository http://dl-5.alpinelinux.org/alpine/edge/testing/ \
-      --repository http://dl-5.alpinelinux.org/alpine/edge/community/ \      
-      -t build-deps \
-      build-base \
-      libffi-dev \
-      libressl-dev \
-      openssl-dev \
-      linux-headers \
-      musl-dev \
-      postgis \
-      postgresql-dev \
-      python3-dev \
-      jpeg-dev \
-      zlib-dev \
-      tiff-dev \
-&& pip install --upgrade pip 
+RUN add-apt-repository ppa:ubuntugis/ppa 
+
+RUN apt-get update
+
+RUN apt-get install -y python3-pip
 
 RUN pip install -r $CYPHON_HOME/requirements.txt 
 
-RUN apk del build-deps 
+RUN python3 -m pip install -r $CYPHON_HOME/requirements.txt 
 
-RUN python -m nltk.downloader -d /usr/local/share/nltk_data punkt wordnet 
+RUN python -m nltk.downloader -d /usr/local/share/nltk_data punkt wordnet
 
 # create unprivileged user
-RUN addgroup -S -g $GID cyphon && adduser -S -G cyphon -u $UID cyphon
+RUN groupadd  -g 1000 cyphon
+RUN adduser --system --ingroup cyphon -u 1000 cyphon
 
 # create application subdirectories
 RUN mkdir -p $CYPHON_HOME \
@@ -93,16 +56,24 @@ COPY cyphon/cyphon/settings/conf.example.py $CYPHON_HOME/cyphon/cyphon/settings/
 COPY cyphon/cyphon/settings/dev.example.py $CYPHON_HOME/cyphon/cyphon/settings/dev.py
 COPY cyphon/cyphon/settings/prod.example.py $CYPHON_HOME/cyphon/cyphon/settings/prod.py
 
+
 # set owner:group and permissions
 RUN chown -R cyphon:cyphon $CYPHON_HOME \
  && chmod -R 775 $CYPHON_HOME \
  && chown -R cyphon:cyphon $LOG_DIR \
  && chmod -R 775 $LOG_DIR
-
+ 
+ 
 WORKDIR $CYPHON_HOME/cyphon
 
 VOLUME ["$CYPHON_HOME/keys", "$CYPHON_HOME/media", "$CYPHON_HOME/static"]
 
 EXPOSE 8000
+
+RUN apt-get -y install gdal-bin
+
+RUN pip3 install psycopg2-binary
+
+RUN apt-get -y install vim sudo
 
 CMD $CYPHON_HOME/entrypoints/run.sh
