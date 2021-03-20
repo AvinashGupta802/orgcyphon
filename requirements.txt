@@ -17,7 +17,7 @@ django-picklefield==1.0.0
 django-s3-storage==0.12.4
 Django==1.11.15  # pyup: >=1.0.0,<2.0.0
 djangorestframework-jwt==1.11.0
-djangorestframework==3.8.2
+djangorestframework==3.11.2
 docutils==0.14
 drfdocs==0.0.11
 ec2-metadata==1.6.0
